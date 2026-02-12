@@ -1,10 +1,4 @@
-Perfect 🔥 Here’s a clean and professional **README.md** for your project.
-
-You can copy this into your `README.md` file.
-
----
-
-# 🎯 AI Event Planning Assistant
+Event Planning Assistant
 
 An AI-powered Event Planning Assistant built using **NVIDIA NAT** and a **ReAct agent architecture**.
 The system intelligently plans, manages, and automates event workflows using dynamic tool orchestration.
@@ -132,4 +126,5 @@ This assistant helps automate event planning by:
 * Orchestrating tools intelligently
 
 ---
+
 
