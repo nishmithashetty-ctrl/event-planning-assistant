@@ -1,0 +1,18 @@
+# Google Drive MCP Integration Requirements
+
+# Core MCP Dependencies
+mcp>=0.1.0
+httpx>=0.24.0
+pydantic>=2.0.0
+
+# NAT Dependencies (if not already installed)
+# nat-sdk>=1.0.0
+
+# Additional utilities
+python-dotenv>=1.0.0  # For loading .env files
+aiofiles>=23.0.0      # Async file operations
+
+# Optional: For OAuth flow
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0

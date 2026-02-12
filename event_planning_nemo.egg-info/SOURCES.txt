@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+event_planning_nemo/__init__.py
+event_planning_nemo/database_tools.py
+event_planning_nemo/event_planning_nemo.py
+event_planning_nemo/human_input_tool.py
+event_planning_nemo/mcp_client.py
+event_planning_nemo/mcp_discovery.py
+event_planning_nemo/mcp_filesystem.py
+event_planning_nemo/mcp_tools.py
+event_planning_nemo/register.py
+event_planning_nemo.egg-info/PKG-INFO
+event_planning_nemo.egg-info/SOURCES.txt
+event_planning_nemo.egg-info/dependency_links.txt
+event_planning_nemo.egg-info/entry_points.txt
+event_planning_nemo.egg-info/requires.txt
+event_planning_nemo.egg-info/top_level.txt

@@ -1,0 +1,15 @@
+[project]
+name = "event-planning-nemo"
+version = "0.1.0"
+description = "Event Planning System using NVIDIA NeMo Agent Toolkit"
+requires-python = ">=3.9"
+dependencies = [
+    "anthropic",
+    "litellm",
+    "mcp",
+    "pydantic",
+    "python-dotenv",
+]
+
+[project.entry-points."nat.components"]
+event_planning = "event_planning_nemo.register"

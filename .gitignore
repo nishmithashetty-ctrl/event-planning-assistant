@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Virtual environment
+venv/
+env/
+nemo-env311/
+
+# Environment variables
+.env
+
+# API keys
+*.json
+token.pickle
+
+# Vector stores
+vector_store/
+
+# OS files
+.DS_Store

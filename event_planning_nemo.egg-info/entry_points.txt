@@ -1,0 +1,2 @@
+[nat.components]
+event_planning = event_planning_nemo.register

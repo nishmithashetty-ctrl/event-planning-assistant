@@ -1,0 +1,45 @@
+llms:
+  event_llm:
+    _type: openai
+    model_name: meta/llama-3.1-70b-instruct
+    base_url: https://integrate.api.nvidia.com/v1
+    api_key: ${NVIDIA_API_KEY}
+
+functions:
+  # === Your custom tools ===
+  theme_generator:
+    _type: event_planning_nemo/generate_event_themes
+    llm_name: event_llm
+
+  save_participant_tool:
+    _type: event_planning_nemo/save_participant
+    database_path: event_planning.db
+
+  get_participants_tool:
+    _type: event_planning_nemo/get_participants
+    database_path: event_planning.db
+
+  weather_checker:
+    _type: event_planning_nemo/check_weather
+    api_key: "ffe8b1d9615f48225e0f09db071d0d82"
+
+  
+
+workflow:
+  _type: rewoo_agent
+  llm_name: event_llm
+  tool_names:
+    - theme_generator
+    - save_participant_tool
+    - get_participants_tool
+    - weather_checker
+  verbose: true
+  use_tool_schema: true
+
+  # Optional ReWOO settings
+  include_tool_input_schema_in_tool_description: true
+  additional_planner_instructions: |
+    Use the ReAct sub-agent if the task requires iterative step-by-step reasoning.
+    Otherwise, plan direct calls to specific tools.
+  additional_solver_instructions: |
+    When solving, merge evidence neatly and provide final answer concisely.

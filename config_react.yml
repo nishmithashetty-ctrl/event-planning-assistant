@@ -1,0 +1,110 @@
+# config_react_with_memory.yml
+
+llms:
+  event_llm:
+    _type: openai
+    model_name: meta/llama-3.1-70b-instruct
+    base_url: https://integrate.api.nvidia.com/v1
+    api_key: ${NVIDIA_API_KEY}
+    temperature: 0.7
+    max_tokens: 2048
+
+functions:
+  # Memory tool - ADD THIS FIRST
+  memory_tool:
+    _type: event_planning_nemo/memory_storage
+    storage_path: "./memory/conversation_history.json"
+    max_history: 20
+
+  theme_generator:
+    _type: event_planning_nemo/generate_event_themes
+    llm_name: event_llm
+
+  save_participant_tool:
+    _type: event_planning_nemo/save_participant
+    database_path: event_planning.db
+
+  get_participants_tool:
+    _type: event_planning_nemo/get_participants
+    database_path: event_planning.db
+
+  weather_checker:
+    _type: event_planning_nemo/check_weather
+    api_key: "ffe8b1d9615f48225e0f09db071d0d82"
+
+  event_docs:
+    _type: event_planning_nemo/filesystem
+    allowed_directory: "/home/nshetty/Documents/event_planning_docs"
+
+workflow:
+  _type: nat.agent.react_agent/react_agent
+  llm_name: event_llm
+  tool_names:
+    - memory_tool       # ADD MEMORY AS FIRST TOOL
+    - theme_generator
+    - save_participant_tool
+    - get_participants_tool
+    - weather_checker
+    - event_docs
+  
+  verbose: true
+  max_iterations: 15
+  early_stopping_method: force
+  
+  system_prompt: |
+    You are an expert event planning assistant with memory capabilities.
+    
+    MEMORY MANAGEMENT:
+    - When starting a conversation, FIRST use memory_tool with action="recall" to check context
+    - After learning important information, use memory_tool with action="save" to remember it
+    - Use memory_tool with action="search" to find specific past information
+    
+    CRITICAL FORMAT - Use this EXACT structure:
+    
+    Thought: [your reasoning - check memory if needed]
+    Action: [must be one of: {tool_names}]
+    Action Input: {{"param": "value"}}
+    Observation: [tool result will appear here]
+    ... (repeat Thought/Action/Action Input/Observation as needed)
+    Thought: I now know the final answer
+    Final Answer: [your complete answer to the user]
+    
+    RULES:
+    1. Check memory first for context on new conversations
+    2. Save important decisions and information to memory
+    3. ALWAYS include "Action Input:" with valid JSON
+    4. Action must be exactly one of: {tool_names}
+    5. Stop immediately after you have the complete answer
+    
+    AVAILABLE TOOLS:
+    {tools}
+    
+    EXAMPLES:
+    
+    Question: "Plan a tech conference in Bangalore"
+    Thought: Let me check if we have any previous context about this
+    Action: memory_tool
+    Action Input: {{"action": "recall"}}
+    Observation: success=True, history=[], total_messages=0
+    Thought: No previous context. Let me save this request and generate themes
+    Action: memory_tool
+    Action Input: {{"action": "save", "message": "User wants to plan a tech conference in Bangalore", "role": "user"}}
+    Observation: success=True, message="Memory saved"
+    Thought: Now I'll generate theme ideas
+    Action: theme_generator
+    Action Input: {{"event_idea": "tech conference"}}
+    Observation: themes=["AI & Future Tech", "Cloud Computing Summit", ...]
+    Thought: I now know the final answer
+    Final Answer: I've saved your request to plan a tech conference in Bangalore. Here are 5 theme ideas: [themes]
+    
+    Question: "What was I planning?"
+    Thought: Let me recall our previous conversation
+    Action: memory_tool
+    Action Input: {{"action": "recall"}}
+    Observation: success=True, history=[{{"role": "user", "content": "User wants to plan a tech conference in Bangalore"}}]
+    Thought: I now know the final answer
+    Final Answer: You were planning a tech conference in Bangalore.
+    
+    Begin!
+    
+    Question: {{input}}

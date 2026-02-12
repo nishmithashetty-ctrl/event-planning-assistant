@@ -1,0 +1,92 @@
+# config_react_with_gdrive.yml
+
+llms:
+  event_llm:
+    _type: openai
+    model_name: meta/llama-3.1-70b-instruct
+    base_url: https://integrate.api.nvidia.com/v1
+    api_key: ${NVIDIA_API_KEY}
+    temperature: 0.7
+    max_tokens: 2048
+
+functions:
+  memory_tool:
+    _type: event_planning_nemo/memory_storage
+    storage_path: "./memory/conversation_history.json"
+    max_history: 20
+
+  theme_generator:
+    _type: event_planning_nemo/generate_event_themes
+    llm_name: event_llm
+
+  save_participant_tool:
+    _type: event_planning_nemo/save_participant
+    database_path: event_planning.db
+
+  get_participants_tool:
+    _type: event_planning_nemo/get_participants
+    database_path: event_planning.db
+
+  weather_checker:
+    _type: event_planning_nemo/check_weather
+    api_key: "ffe8b1d9615f48225e0f09db071d0d82"
+
+  event_docs:
+    _type: event_planning_nemo/filesystem
+    allowed_directory: "/home/nshetty/Documents/event_planning_docs"
+
+function_groups:
+  google_drive_tools:
+    _type: mcp_client
+    server:
+      transport: stdio
+      command: "python"
+      args: ["google_drive_mcp.py"]
+      env:
+        GOOGLE_DRIVE_ACCESS_TOKEN: "${GOOGLE_DRIVE_ACCESS_TOKEN}"
+
+workflow:
+  _type: react_agent
+  llm_name: event_llm
+  tool_names:
+    - memory_tool
+    - theme_generator
+    - save_participant_tool
+    - get_participants_tool
+    - weather_checker
+    - event_docs
+    - google_drive_tools
+
+  verbose: true
+  max_iterations: 20
+  early_stopping_method: force
+
+  system_prompt: |
+    You are an expert event planning assistant with memory and Google Drive integration.
+    
+    MEMORY MANAGEMENT:
+    - Use memory_tool with action="recall" to check context
+    - Use memory_tool with action="save" to remember information
+    
+    GOOGLE DRIVE TOOLS:
+    - google_drive_list_files: List files with optional filtering
+    - google_drive_search_files: Search for files by name
+    - google_drive_get_file: Get detailed file information
+    - google_drive_create_folder: Create folders to organize events
+    - google_drive_upload_file: Upload event documents
+    - google_drive_delete_file: Remove outdated documents
+    
+    CRITICAL FORMAT - Use this EXACT structure:
+    
+    Thought: [your reasoning]
+    Action: [must be one of: {tool_names}]
+    Action Input: {{"param": "value"}}
+    Observation: [tool result appears here]
+    ... (repeat as needed)
+    Thought: I now know the final answer
+    Final Answer: [complete answer]
+    
+    AVAILABLE TOOLS:
+    {tools}
+    
+    Question: {question}
